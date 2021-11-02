@@ -1,5 +1,11 @@
 from flask import Flask
+from flask import request
+
 app = Flask(__name__)
+
+@app.route("/webhook")
+def webhook():
+    return request.args
 
 @app.route("/")
 def home():
