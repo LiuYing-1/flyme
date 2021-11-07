@@ -6,6 +6,7 @@ import pymysql
 from werkzeug.wrappers import response
 app = Flask(__name__)
 
+global message
 
 # Azure Database Connection - Cloud
 def conn():
@@ -28,8 +29,8 @@ def extractValues(result):
         landingTime = str(flight[5])
         price = flight[6]
 
-        # item = {"id": fid, "code": code, "startRegion": startRegion, "endRegion": endRegion, "departureTime": departureTime, "landingTime": landingTime, "price": price}
-        item = "{}:{} - {}({}) => {}({}), RMB: {}".format(fid, code, startRegion, departureTime, endRegion, landingTime, price)
+        item = {"id": fid, "code": code, "startRegion": startRegion, "endRegion": endRegion, "departureTime": departureTime, "landingTime": landingTime, "price": price}
+        # item = "{}:{} - {}({}) => {}({}), RMB: {}".format(fid, code, startRegion, departureTime, endRegion, landingTime, price)
         items.append(item)
     return items
 
