@@ -37,7 +37,8 @@ def extractValues(result):
 # Convert Response into JSON format
 def convertFormat(items):
     flights = {"flights": items}
-    res = json.dumps(flights)
+    res = json.loads(json.dumps(flights))
+    print(type(res))
     print(res)
     return res
 
