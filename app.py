@@ -52,7 +52,6 @@ def viewFlights(cur):
 
     # Format the output
     items = extractValues(resultSet)
-
     response = convertFormat(items)
     return response
 
@@ -70,7 +69,6 @@ def bookTickets(paramsFromAssistant, cur):
     resultSet = cur.fetchall()
 
     items = extractValues(resultSet)
-
     response = convertFormat(items)
     return response
 
