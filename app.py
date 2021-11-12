@@ -123,7 +123,6 @@ def bookTicketsSecondStepBook(paramsSecondStep, cur):
         ticketCode = int(generateTicketCode())
         sqlStatement = "insert into user_ref_flight(flight_id, user_id, ticket_code) values('{}', '{}', '{}')".format(flightId, userId, ticketCode)
         cur.execute(sqlStatement)
-        
         message = "Your ticket has been booked successfully, ticket code is '{}'".format(ticketCode)
     else:
         message = "Your password is incorrect"
