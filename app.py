@@ -1,13 +1,15 @@
+import os
+import json
+import random
+import pymysql
+from data import Flight, User
 from typing import List
 from flask import Flask
 from flask import request
 from datetime import datetime
-from data import Flight
 from dotenv import load_dotenv
-import os
-import json
-import pymysql
 from werkzeug.wrappers import response
+
 app = Flask(__name__)
 
 load_dotenv()
@@ -17,7 +19,7 @@ user = os.getenv("DATABASEUSER")
 password = os.getenv("PASSWORD")
 db = os.getenv("DB")
 
-# Azure Database Connection - Cloud
+# Database Connection - Cloud
 def conn():
     database = pymysql.connect(host=host, 
                                port=port,
@@ -59,24 +61,84 @@ def viewFlights(cur):
     return response
 
 
-# Book Tickets => Business 2
-def bookTickets(paramsFromAssistant, cur):
+# Book Tickets - First Step
+def bookTicketsFirstStepCheck(paramsFirstStep, cur):
+    print("first step")
     # Assign the values as the searching conditions
-    startRegion = paramsFromAssistant["startRegion"]
-    endRegion = paramsFromAssistant["endRegion"]
-    date = paramsFromAssistant["date"]
-    
+    startRegion = paramsFirstStep["startRegion"]
+    endRegion = paramsFirstStep["endRegion"]
+    date = paramsFirstStep["date"]
     sqlStatement = "select * from flight where (start_region = '{}' and end_region = '{}' and departure_time like '{} %')".format(startRegion, endRegion, date)
-
-
     flights = get_flights(cur, sqlStatement)
-    response = {
+    responseFirstStep = {
         "flights": [
             flight.dict() for flight in flights
         ]
     }
+    return responseFirstStep
+
+# Get corresponding user information with username
+def getUserByUsername(name, cursor):
+    sql = "select * from user where username = '{}'".format(name)
+    cursor.execute(sql)
+    result = cursor.fetchone()
     
-    print(paramsFromAssistant)
+    return result
+
+# Get corresponding flight information with flightCode
+def getFlightByFlightcode(code, cursor):
+    sql = "select * from flight where flight_code = '{}'".format(code)
+    cursor.execute(sql)
+    result = cursor.fetchone()
+    
+    return result
+
+# Generate ticketCode
+def generateTicketCode():
+    str = ""
+    for i in range(5):
+        ch = chr(random.randrange(ord('0'), ord('9') + 1))
+        str += ch
+    return str
+
+# Book Tickets - Second Step
+def bookTicketsSecondStepBook(paramsSecondStep, cur):
+    print("second step")
+    # Assign the flight code to the variable
+    flightCode = paramsSecondStep["flightCode"]
+    username = paramsSecondStep["username"]
+    password = int(paramsSecondStep["password"])
+    
+    # Get corresponding user.id => UserInformation
+    user = getUserByUsername(username, cur)
+    userId = user[0]
+    userName = user[1]
+    passWord = int(user[2])
+    
+    # Get corresponding flight.id => FlightInformation
+    flight = getFlightByFlightcode(flightCode, cur)
+    flightId = flight[0]
+    
+    # Confirm the ticket - Insert the value of ticket
+    if password == passWord:
+        ticketCode = int(generateTicketCode())
+        sqlStatement = "insert into user_ref_flight(flight_id, user_id, ticket_code) values('{}', '{}', '{}')".format(flightId, userId, ticketCode)
+        cur.execute(sqlStatement)
+        message = "Your ticket has been booked successfully, ticket code is '{}'".format(ticketCode)
+    else:
+        message = "Password Not Matching"
+    response = {"message":message}
+    
+    return response
+
+# Book Tickets => Business 2
+def bookTickets(paramsFromAssistant, cur):
+    print(len(paramsFromAssistant))
+    step = paramsFromAssistant["signal"]
+    if(step == "first"):
+        response = bookTicketsFirstStepCheck(paramsFromAssistant, cur)
+    elif(step == "second"):
+        response = bookTicketsSecondStepBook(paramsFromAssistant, cur)
     
     return response
 
@@ -105,6 +167,10 @@ def webhook():
     flymeDB.close()
     # return params
     return messages
+
+@app.route("/static/doc")
+def devdoc():
+    return app.send_static_file('doc.html')
 
 # Static Index Here
 @app.route("/")
