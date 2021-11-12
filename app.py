@@ -86,7 +86,7 @@ def getUserByUsername(name, cursor):
     return result
 
 # Get corresponding flight information with flightCode
-def getFlightByFlightcode(code, cursor):
+def getFlightByFlightCode(code, cursor):
     sql = "select * from flight where flight_code = '{}'".format(code)
     cursor.execute(sql)
     result = cursor.fetchone()
@@ -112,11 +112,10 @@ def bookTicketsSecondStepBook(paramsSecondStep, cur):
     # Get corresponding user.id => UserInformation
     user = getUserByUsername(username, cur)
     userId = user[0]
-    userName = user[1]
     passWord = user[2]
     
     # Get corresponding flight.id => FlightInformation
-    flight = getFlightByFlightcode(flightCode, cur)
+    flight = getFlightByFlightCode(flightCode, cur)
     flightId = flight[0]
     
     # Confirm the ticket - Insert the value of ticket
@@ -124,16 +123,16 @@ def bookTicketsSecondStepBook(paramsSecondStep, cur):
         ticketCode = int(generateTicketCode())
         sqlStatement = "insert into user_ref_flight(flight_id, user_id, ticket_code) values('{}', '{}', '{}')".format(flightId, userId, ticketCode)
         cur.execute(sqlStatement)
+        
         message = "Your ticket has been booked successfully, ticket code is '{}'".format(ticketCode)
     else:
-        message = "Password Not Matching"
+        message = "Your password is incorrect"
     response = {"messages":message}
     
     return response
 
 # Book Tickets => Business 2
 def bookTickets(paramsFromAssistant, cur):
-    print(len(paramsFromAssistant))
     step = paramsFromAssistant["signal"]
     if(step == "first"):
         response = bookTicketsFirstStepCheck(paramsFromAssistant, cur)
@@ -163,6 +162,8 @@ def webhook():
     elif action == "bookTickets":
         messages = bookTickets(params, cursor)
 
+    # Commit the change
+    flymeDB.commit()
     # Close Connection
     flymeDB.close()
     # return params
