@@ -107,13 +107,13 @@ def bookTicketsSecondStepBook(paramsSecondStep, cur):
     # Assign the flight code to the variable
     flightCode = paramsSecondStep["flightCode"]
     username = paramsSecondStep["username"]
-    password = int(paramsSecondStep["password"])
+    password = paramsSecondStep["password"]
     
     # Get corresponding user.id => UserInformation
     user = getUserByUsername(username, cur)
     userId = user[0]
     userName = user[1]
-    passWord = int(user[2])
+    passWord = user[2]
     
     # Get corresponding flight.id => FlightInformation
     flight = getFlightByFlightcode(flightCode, cur)
