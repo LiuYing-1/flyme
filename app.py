@@ -3,38 +3,28 @@ from flask import Flask
 from flask import request
 from datetime import datetime
 from data import Flight
+from dotenv import load_dotenv
+import os
 import json
 import pymysql
 from werkzeug.wrappers import response
 app = Flask(__name__)
 
+load_dotenv()
+host = os.getenv("HOST")
+port = int(os.getenv("PORT"))
+user = os.getenv("USER")
+password = os.getenv("PASSWORD")
+db = os.getenv("DB")
 
 # Azure Database Connection - Cloud
 def conn():
-    database = pymysql.connect(host="ooxzzs27.2402.dnstoo.com", 
-                               port=5503,
-                               user="w31wnp_f",
-                               password="XEGXR20210511135626",
-                               db="w31wnp")    
+    database = pymysql.connect(host=host, 
+                               port=port,
+                               user=user,
+                               password=password,
+                               db=db)
     return database
-
-
-# Extract Values and assign them, respectively
-def extractValues(result):
-    items = []
-    for flight in result:
-        fid = flight[0]
-        code = flight[1]
-        startRegion = flight[2]
-        endRegion = flight[3]
-        departureTime = str(flight[4])
-        landingTime = str(flight[5])
-        price = flight[6]
-
-        # item = {"id": fid, "code": code, "startRegion": startRegion, "endRegion": endRegion, "departureTime": departureTime, "landingTime": landingTime, "price": price}
-        item = "{}:{} - {}({}) => {}({}), RMB: {}".format(fid, code, startRegion, departureTime, endRegion, landingTime, price)
-        items.append(item)
-    return items
 
 
 # Convert Response into JSON format
@@ -45,6 +35,7 @@ def convertFormat(items):
     print(res)
     return res
 
+
 def get_flights(cursor, sql) -> List[Flight]:
     # View all the records in the table 'flight'
     cursor.execute(sql)
@@ -53,6 +44,7 @@ def get_flights(cursor, sql) -> List[Flight]:
         Flight.create_from_tuple(result) for result in resultSet
     ]
     return flights
+
 
 # View Flights Information => Business 1
 def viewFlights(cur):
@@ -83,6 +75,8 @@ def bookTickets(paramsFromAssistant, cur):
             flight.dict() for flight in flights
         ]
     }
+    
+    print(paramsFromAssistant)
     
     return response
 
