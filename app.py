@@ -13,7 +13,7 @@ app = Flask(__name__)
 load_dotenv()
 host = os.getenv("HOST")
 port = int(os.getenv("PORT"))
-user = os.getenv("USER")
+user = os.getenv("DATABASEUSER")
 password = os.getenv("PASSWORD")
 db = os.getenv("DB")
 
