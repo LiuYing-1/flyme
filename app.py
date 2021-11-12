@@ -1,6 +1,8 @@
+from typing import List
 from flask import Flask
 from flask import request
 from datetime import datetime
+from data import Flight
 import json
 import pymysql
 from werkzeug.wrappers import response
@@ -9,10 +11,11 @@ app = Flask(__name__)
 
 # Azure Database Connection - Cloud
 def conn():
-    database = pymysql.connect(host="flymedb.mysql.database.azure.com", 
-                              user="yiliu18@flymedb",
-                              password="202181224_Njit",
-                              db="flymetest")    
+    database = pymysql.connect(host="ooxzzs27.2402.dnstoo.com", 
+                               port=5503,
+                               user="w31wnp_f",
+                               password="XEGXR20210511135626",
+                               db="w31wnp")    
     return database
 
 
@@ -42,34 +45,45 @@ def convertFormat(items):
     print(res)
     return res
 
+def get_flights(cursor, sql) -> List[Flight]:
+    # View all the records in the table 'flight'
+    cursor.execute(sql)
+    resultSet = cursor.fetchall()
+    flights = [
+        Flight.create_from_tuple(result) for result in resultSet
+    ]
+    return flights
 
 # View Flights Information => Business 1
 def viewFlights(cur):
-    # View all the records in the table 'flight'
     sqlStatement = "select * from flight"
-    cur.execute(sqlStatement)
-    resultSet = cur.fetchall()
-
-    # Format the output
-    items = extractValues(resultSet)
-    response = convertFormat(items)
+    flights = get_flights(cur, sqlStatement)
+    response = {
+        "flights": [
+            flight.dict() for flight in flights
+        ]
+    }
+    
     return response
+
 
 # Book Tickets => Business 2
 def bookTickets(paramsFromAssistant, cur):
     # Assign the values as the searching conditions
-    print(paramsFromAssistant)
     startRegion = paramsFromAssistant["startRegion"]
     endRegion = paramsFromAssistant["endRegion"]
     date = paramsFromAssistant["date"]
     
     sqlStatement = "select * from flight where (start_region = '{}' and end_region = '{}' and departure_time like '{} %')".format(startRegion, endRegion, date)
 
-    cur.execute(sqlStatement)
-    resultSet = cur.fetchall()
 
-    items = extractValues(resultSet)
-    response = convertFormat(items)
+    flights = get_flights(cur, sqlStatement)
+    response = {
+        "flights": [
+            flight.dict() for flight in flights
+        ]
+    }
+    
     return response
 
 
@@ -83,7 +97,6 @@ def webhook():
     params = json.loads(request.data.decode('utf-8'))
     
     # Select which one to go
-    print(params)
     action = params['action']
 
     # View Flights Part
