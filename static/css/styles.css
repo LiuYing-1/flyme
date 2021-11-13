@@ -1,0 +1,301 @@
+/*
+Authors: Jamal Williams, Eric Jones, Laura Smith, Sofia Perez
+Date: Current Date
+File Name: styles.css
+*/
+
+/* CSS reset */
+body, header, nav, main, footer, article, aside, section, figure, figcaption, details, summary, img, h1, h3, ul {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* Style rule for images */
+img {
+  max-width: 100%;
+  display: block;
+}
+
+body {
+  background-color: #5371a9;
+}
+
+/* Style rules for mobile viewport */
+
+/* Style rule to hide the tablet-desk class */
+.tablet-desk {
+  display: none;
+}
+
+/* Style rules for header content */
+header h1 {
+  text-align: center;
+  color: #fff;
+  font-family: 'Playfair Display', serif;
+  padding: 5%;
+  font-size: 3em;
+}
+
+/* Style rules for navigation area */
+nav {
+  background-color: #fff;
+  border-bottom: 1px solid #003e80;
+}
+
+nav ul {
+  list-style-type: none;
+  text-align: center;
+}
+
+nav li {
+  display: inline-block;
+  font-size: 1em;
+  font-family: Geneva, Arial, sans-serif;
+  font-weight: bold;
+  padding: 3%;
+}
+
+nav li a {
+  display: block;
+  color: #314263;
+  text-decoration: none;
+}
+
+/* Style rules for main content */
+main {
+  padding: 2%;
+  background-color: #e7eaf3;
+  font-family: 'PT Sans', sans-serif;
+}
+
+main p {
+  font-size: 1.25em;
+}
+
+#welcome img:first-child {
+  border: solid 1px #003e80;
+}
+
+main a {
+  color: #003e80;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+main ul {
+  list-style-type: square;
+  margin-left: 12%;
+}
+
+figure {
+padding: 4px;
+margin: auto;
+}
+
+figcaption {
+color: black;
+font-style: italic;
+font-family: "times new roman", "serif";
+padding: 2px;
+text-align: center;
+}
+
+.text-pic-top {
+  color: white;
+  font-style: italic;
+  font-family: "times new roman", "serif";
+  padding: 2px;
+  background-color: black;
+  width: 200px;
+}
+
+.contactPart {
+  text-align: center;
+}
+
+.map {
+  margin: auto;
+  width: 700px;
+}
+
+.introduction article p::first-letter {
+color: #5371a9;
+font-size: xx-large;
+}
+
+.introduction article p::first-line {
+text-decoration: underline;
+}
+
+.introduction article p {
+  text-indent: 50px;
+}
+
+.two summary {
+  margin-left: 0;
+  padding: 10px;
+  width: 10%;
+  border: 2px solid grey;
+}
+
+.detail-content {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  background-color: lightgrey;
+  box-sizing: border-box;
+  padding: 10px;
+}
+
+.sidebar {
+  width: 200px;
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+
+.introduction article {
+  grid-column: 1 / 3;
+}
+
+.introduction aside {
+  grid-column: 3 / 4;
+}
+
+.action {
+  font-size: 1.15em;
+  font-weight: bold;
+  color: #003e80;
+}
+
+.tel-link {
+  background-color: #5371a9;
+  padding: 2%;
+  width: 60%;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.tel-link a {
+  color: #e7eaf3;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.round {
+  border-radius: 12px;
+}
+
+#clubs ul li {
+  padding-bottom: 4%;
+}
+
+/* Style rules for footer content */
+footer {
+  text-align: center;
+  font-size: 0.85em;
+  color: #fff;
+  padding: 1% 0;
+}
+
+footer a {
+  color: #fff;
+  text-decoration: none;
+}
+
+/* Media Query for Tablet Viewport */
+@media screen and (min-width: 530px), print {
+
+  /* Tablet Viewport: Show tablet-desk class, hide mobile class */
+  .tablet-desk {
+      display: block;
+  }
+
+  .mobile {
+      display: none;
+  }
+  
+  /* Tablet Viewport: Style rule for nav area */
+  nav li {
+      padding: 2% 5%;
+      font-size: 1.5em;
+  }
+  
+  /* Tablet Viewport: Style rules for main content */
+  .center {
+      margin: 0 auto;
+  }
+  
+  #clubs ul {
+      margin-left: 4%;
+  }
+}
+
+/* Media Query for Desktop Viewport */
+@media screen and (min-width: 950px), print {
+  
+  /* Desktop Viewport: Style rules for nav area */
+  nav li {
+      font-size: 1.5em;
+  }
+  
+  nav li a {
+      padding: 0.5em 1.25em;
+  }
+  
+  nav li a:hover {
+      color: #e7eaf3;
+      background-color: #003e80;
+  }
+  
+  /* Desktop Viewport: Style rules for main content */
+  main {
+      overflow: auto;
+  }
+  
+  #prog-info, #prog-meet {
+      width: 45%;
+      float: left;
+      padding: 2%;
+  }
+  
+  /* Desktop Viewport: Style rule for footer content */
+  footer {
+      clear: left;
+  }
+  
+}
+
+/* Media Query for Large Desktop Viewports */
+@media screen and (min-width: 1441px) {
+  
+  /* Large Desktop Viewport: Style rules for body and wrapper */
+  body {
+      background: linear-gradient(#e7eaf3, #003e80);
+      background-repeat: no-repeat;
+  }
+  
+  #wrapper {
+      width: 1440px;
+      margin: 0 auto;
+  }
+  
+  /* Large Desktop Viewport: Style rule for header content */
+  header h1 {
+      color: #003e80;
+  }
+  
+  /* Large Desktop Viewport: Style rule for main content */
+  main {
+      background-color: #e7eaf3;
+  }
+  
+}
+
+/* Media Query for Print */
+@media print {
+  body {
+      background-color: #fff;
+      color: #000;
+  }
+}

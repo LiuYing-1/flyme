@@ -351,6 +351,11 @@ def devDoc():
 def cancellationTerms():
     return app.send_static_file('cancellation.html')
 
+# Our Bureau Location - NJIT (Liu, Ying)
+@app.route("/static/contact")
+def contactUs():
+    return app.send_static_file('contact.html')
+
 # Static Index Here
 @app.route("/")
 def home():
