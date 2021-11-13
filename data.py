@@ -45,7 +45,7 @@ class Ticket(BaseModel):
     username: str
     password: str
     flight_code: str
-    depature_date: datetime
+    departure_time: datetime
     price: float    
     
     @classmethod

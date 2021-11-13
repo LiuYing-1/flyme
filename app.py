@@ -98,7 +98,7 @@ def getFlightByFlightCode(code, cursor):
 def generateTicketCode():
     str = ""
     for i in range(5):
-        ch = chr(random.randrange(ord('0'), ord('9') + 1))
+        ch = chr(random.randrange(ord('1'), ord('9') + 1))
         str += ch
     return str
 
@@ -194,7 +194,6 @@ def getTicketInDetailByTicketCode(code, cur):
 
 # Check Tickets => Business 3
 def checkTickets(paramsFromAssistant, cur):
-    print(paramsFromAssistant)
     # Assign the values from assistant to each variables
     usernameFromAssistant = paramsFromAssistant["username"]
     passwordFromAssistant = paramsFromAssistant["password"]
@@ -203,6 +202,8 @@ def checkTickets(paramsFromAssistant, cur):
     # Check the ticket code and validate the user
     ticket = getTicketByTicketCode(ticketCodeFromAssistant, cur)
     
+    # Initialize the existence
+    existence = "no"
     if ticket == None:
         message = "Sorry, Ticket Code '{}' does not exist.".format(ticketCodeFromAssistant)
     else:
@@ -214,8 +215,74 @@ def checkTickets(paramsFromAssistant, cur):
         message = "Sorry, incorrect user information."
         
         if result:
+            existence = "yes"
             res = getTicketInDetailByTicketCode(ticketCodeFromAssistant, cur)
             message = Ticket.create_from_tuple(res).json()
+    response = {"messages": message, "mark": existence}
+    
+    return response
+
+# Calculate the criteria
+def getCriteria():
+    value1 = datetime(2021, 11, 13, 0, 0, 0).timestamp()
+    value2 = datetime(2021, 11, 15, 0, 0, 0).timestamp()
+    return value2-value1
+
+# Delete the ticket
+def deleteTicketByTicketCode(code, cur):
+    sql = "delete from user_ref_flight where ticket_code='{}'".format(code)
+    cur.execute(sql)
+
+
+# Result mark value is yes
+def resMarkIsValue(res, cur):
+    ticket = json.loads(res["messages"])
+
+    # Get the departure_time, price and flight_code
+    departure_time = ticket["departure_time"]
+    ticketCode = ticket["ticket_code"]
+    flightCode = ticket["flight_code"]
+    price = ticket["price"]
+    
+    # Delete the ticket
+    deleteTicketByTicketCode(ticketCode, cur)
+    
+    # Divide the time
+    year = int(departure_time[0:4])
+    month = int(departure_time[5:7])
+    day = int(departure_time[8:10])
+    hour = int(departure_time[11:13])
+    minute = int(departure_time[14:16])
+    sec = int(departure_time[17:19])
+    
+    # Convert the departure_time into 'timestamp'
+    timestampOfDepartureTime = datetime(year, month, day, hour, minute, sec).timestamp()
+    now = (datetime.now()).timestamp()
+    
+    # Compare the remaining time with the criteria
+    remaining = timestampOfDepartureTime - now
+    criteria = getCriteria()
+    
+    if(remaining > criteria):
+        fee = price * 1
+    else:
+        fee = price * 0.9
+
+    message = "Your ticket '{}' of '{}' has been cancelled with returning fee '{}' => ('{}')".format(ticketCode, flightCode, fee, price)
+    return message
+
+
+# Cancel Tickets => Business 4
+def cancelTickets(paramsFromAssistant, cur):
+    # Repeat the checkTickets() Operation, as they share the same logic
+    # Return the ticket for further operation
+    result = checkTickets(paramsFromAssistant, cur)
+    
+    if (result["mark"] == "yes"):
+        message = resMarkIsValue(result, cur)
+    elif (result["mark"] == "no"):
+        message = "This ticket does not exist."
+    
     response = {"messages": message}
     
     return response
@@ -244,6 +311,10 @@ def webhook():
     elif action == "checkTickets":
         messages = checkTickets(params, cursor)
 
+    # Cancel Tickets Part
+    elif action == "cancelTickets":
+        messages = cancelTickets(params, cursor)
+
     # Commit the change
     flymeDB.commit()
     # Close Connection
@@ -253,8 +324,13 @@ def webhook():
 
 # Dev Doc - Liu, Ying
 @app.route("/static/doc")
-def devdoc():
+def devDoc():
     return app.send_static_file('doc.html')
+
+# Cancellation Terms - FlyMe Airline (Liu, Ying)
+@app.route("/static/cancellation")
+def cancellationTerms():
+    return app.send_static_file('cancellation.html')
 
 # Static Index Here
 @app.route("/")
