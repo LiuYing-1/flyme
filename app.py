@@ -2,7 +2,7 @@ import os
 import json
 import random
 import pymysql
-from data import Flight, User
+from data import Flight, User, Ticket
 from typing import List
 from flask import Flask
 from flask import request
@@ -26,6 +26,7 @@ def conn():
                                user=user,
                                password=password,
                                db=db)
+    
     return database
 
 
@@ -33,8 +34,7 @@ def conn():
 def convertFormat(items):
     flights = {"flights": items}
     res = json.loads(json.dumps(flights))
-    print(type(res))
-    print(res)
+    
     return res
 
 
@@ -75,6 +75,7 @@ def bookTicketsFirstStepCheck(paramsFirstStep, cur):
             flight.dict() for flight in flights
         ]
     }
+    
     return responseFirstStep
 
 # Get corresponding user information with username
@@ -112,14 +113,14 @@ def bookTicketsSecondStepBook(paramsSecondStep, cur):
     # Get corresponding user.id => UserInformation
     user = getUserByUsername(username, cur)
     userId = user[0]
-    passWord = user[2]
+    passwordFromDatabase = user[2]
     
     # Get corresponding flight.id => FlightInformation
     flight = getFlightByFlightCode(flightCode, cur)
     flightId = flight[0]
     
     # Confirm the ticket - Insert the value of ticket
-    if password == passWord:
+    if password == passwordFromDatabase:
         ticketCode = int(generateTicketCode())
         sqlStatement = "insert into user_ref_flight(flight_id, user_id, ticket_code) values('{}', '{}', '{}')".format(flightId, userId, ticketCode)
         cur.execute(sqlStatement)
@@ -137,6 +138,85 @@ def bookTickets(paramsFromAssistant, cur):
         response = bookTicketsFirstStepCheck(paramsFromAssistant, cur)
     elif(step == "second"):
         response = bookTicketsSecondStepBook(paramsFromAssistant, cur)
+    
+    return response
+
+# Check the existence of the ticket by ticket code
+def getTicketByTicketCode(code, cur):
+    sql = "select * from user_ref_flight where ticket_code = '{}'".format(code)
+    cur.execute(sql)
+    result = cur.fetchone()
+    
+    return result
+
+# Validate the corresponding user information of the ticket
+def validateUserOfTicketByTicketCode(username, password, code, cur):
+    sql = "select \
+                user.username, user.password \
+            from \
+                user, user_ref_flight \
+            where \
+                user.id = user_ref_flight.user_id \
+            and \
+                ticket_code='{}'".format(code)
+    cur.execute(sql)
+    result = cur.fetchone()
+    
+    usernameFromDatabase = result[0]
+    passwordFromDatabase = result[1]
+    
+    if (usernameFromDatabase != username or passwordFromDatabase != password):
+        return False
+    else:
+        return True
+    
+# Get ticket details
+def getTicketInDetailByTicketCode(code, cur):
+    sql = "select\
+                user_ref_flight.ticket_code, \
+	            user.username, \
+	            user.password, \
+	            flight.flight_code, \
+	            flight.departure_time, \
+	            flight.price \
+           from \
+	            user, flight, user_ref_flight \
+           where \
+	            user.id = user_ref_flight.user_id \
+           and \
+	            flight.id = user_ref_flight.flight_id \
+           and \
+	            ticket_code='{}'".format(code)
+    cur.execute(sql)
+    result = cur.fetchone()
+    
+    return result
+
+# Check Tickets => Business 3
+def checkTickets(paramsFromAssistant, cur):
+    print(paramsFromAssistant)
+    # Assign the values from assistant to each variables
+    usernameFromAssistant = paramsFromAssistant["username"]
+    passwordFromAssistant = paramsFromAssistant["password"]
+    ticketCodeFromAssistant = paramsFromAssistant["ticketCode"]
+    
+    # Check the ticket code and validate the user
+    ticket = getTicketByTicketCode(ticketCodeFromAssistant, cur)
+    
+    if ticket == None:
+        message = "Sorry, Ticket Code '{}' does not exist.".format(ticketCodeFromAssistant)
+    else:
+        result = validateUserOfTicketByTicketCode(usernameFromAssistant, \
+                                                  passwordFromAssistant, \
+                                                  ticketCodeFromAssistant, cur)
+        
+        # Initialize the message
+        message = "Sorry, incorrect user information."
+        
+        if result:
+            res = getTicketInDetailByTicketCode(ticketCodeFromAssistant, cur)
+            message = Ticket.create_from_tuple(res).json()
+    response = {"messages": message}
     
     return response
 
@@ -160,6 +240,9 @@ def webhook():
     # Book Tickets Part
     elif action == "bookTickets":
         messages = bookTickets(params, cursor)
+        
+    elif action == "checkTickets":
+        messages = checkTickets(params, cursor)
 
     # Commit the change
     flymeDB.commit()
@@ -168,6 +251,7 @@ def webhook():
     # return params
     return messages
 
+# Dev Doc - Liu, Ying
 @app.route("/static/doc")
 def devdoc():
     return app.send_static_file('doc.html')
