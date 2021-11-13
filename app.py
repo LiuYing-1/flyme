@@ -126,7 +126,7 @@ def bookTicketsSecondStepBook(paramsSecondStep, cur):
         cur.execute(sqlStatement)
         message = "Your ticket has been booked successfully, ticket code is '{}'".format(ticketCode)
     else:
-        message = "Your password is incorrect"
+        message = "Your password is incorrect, please restart this branch of the conversation."
     response = {"messages":message}
     
     return response
@@ -205,14 +205,14 @@ def checkTickets(paramsFromAssistant, cur):
     # Initialize the existence
     existence = "no"
     if ticket == None:
-        message = "Sorry, Ticket Code '{}' does not exist.".format(ticketCodeFromAssistant)
+        message = "Sorry, Ticket Code '{}' does not exist. Please restart this branch of the conversation".format(ticketCodeFromAssistant)
     else:
         result = validateUserOfTicketByTicketCode(usernameFromAssistant, \
                                                   passwordFromAssistant, \
                                                   ticketCodeFromAssistant, cur)
         
         # Initialize the message
-        message = "Sorry, incorrect user information."
+        message = "Sorry, incorrect user information. Please restart this branch of the conversation."
         
         if result:
             existence = "yes"
@@ -281,12 +281,27 @@ def cancelTickets(paramsFromAssistant, cur):
     if (result["mark"] == "yes"):
         message = resMarkIsValue(result, cur)
     elif (result["mark"] == "no"):
-        message = "This ticket does not exist."
+        message = "This ticket does not exist. Please restart this branch of this conversation."
     
     response = {"messages": message}
     
     return response
 
+# Give scores for the service => Business 5
+def giveFeedback(paramsFromAssistant, cur):
+    # Assign the values to username and remark
+    username = paramsFromAssistant["username"]
+    remark = paramsFromAssistant["remark"]
+    
+    # Insert Operation
+    sql = "insert into feedback(username, remark) values('{}', '{}')".format(username, remark)
+    cur.execute(sql)
+    
+    message = "Thanks for your advice to FlyMe! \
+               Hope to offer you with a better experience next time!"
+               
+    response = {"messages": message}
+    return response
 
 # Webhook Operations Here => http:webhook.flyme.social
 @app.route("/webhook", methods=['POST', 'GET'])
@@ -314,6 +329,10 @@ def webhook():
     # Cancel Tickets Part
     elif action == "cancelTickets":
         messages = cancelTickets(params, cursor)
+        
+    # Collect Feedback Part
+    elif action == "giveFeedback":
+        messages = giveFeedback(params, cursor)
 
     # Commit the change
     flymeDB.commit()
