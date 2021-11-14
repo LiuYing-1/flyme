@@ -102,6 +102,28 @@ def generateTicketCode():
         str += ch
     return str
 
+
+# Extract the Book Ticket Second Step Book - User Exist
+def bookTicketSecondStepBookUserExist(user, password, code, cur):
+    userId = user[0]
+    passwordFromDatabase = user[2]
+    
+    # Get corresponding flight.id => FlightInformation
+    flight = getFlightByFlightCode(code, cur)
+    flightId = flight[0]
+
+    if password == passwordFromDatabase:
+        ticketCode = int(generateTicketCode())
+        sqlStatement = "insert into user_ref_flight(flight_id, user_id, ticket_code) \
+                        values('{}', '{}', '{}')".format(flightId, userId, ticketCode)
+        cur.execute(sqlStatement)
+        message = "Your ticket has been booked successfully, ticket code is '{}'".format(ticketCode)
+    else:
+        message = "Your password is incorrect, please restart this branch of the conversation."
+    
+    return message
+    
+
 # Book Tickets - Second Step
 def bookTicketsSecondStepBook(paramsSecondStep, cur):
     print("second step")
@@ -110,23 +132,13 @@ def bookTicketsSecondStepBook(paramsSecondStep, cur):
     username = paramsSecondStep["username"]
     password = paramsSecondStep["password"]
     
-    # Get corresponding user.id => UserInformation
-    user = getUserByUsername(username, cur)
-    userId = user[0]
-    passwordFromDatabase = user[2]
-    
-    # Get corresponding flight.id => FlightInformation
-    flight = getFlightByFlightCode(flightCode, cur)
-    flightId = flight[0]
-    
-    # Confirm the ticket - Insert the value of ticket
-    if password == passwordFromDatabase:
-        ticketCode = int(generateTicketCode())
-        sqlStatement = "insert into user_ref_flight(flight_id, user_id, ticket_code) values('{}', '{}', '{}')".format(flightId, userId, ticketCode)
-        cur.execute(sqlStatement)
-        message = "Your ticket has been booked successfully, ticket code is '{}'".format(ticketCode)
+    # Test - Check User Authority
+    userExistence = getUserByUsername(username, cur)
+    if (userExistence == None):
+        message = "Sorry, you don't have authority to book a ticket, please make a registration first."
     else:
-        message = "Your password is incorrect, please restart this branch of the conversation."
+        message = bookTicketSecondStepBookUserExist(userExistence, password, flightCode, cur)
+        
     response = {"messages":message}
     
     return response
@@ -281,7 +293,12 @@ def cancelTickets(paramsFromAssistant, cur):
     if (result["mark"] == "yes"):
         message = resMarkIsValue(result, cur)
     elif (result["mark"] == "no"):
-        message = "This ticket does not exist. Please restart this branch of this conversation."
+        message = "Incorrect user information. Please restart this branch of the conversation."
+        
+        ticketCode = paramsFromAssistant["ticketCode"]
+        result = getTicketByTicketCode(ticketCode, cur)
+        if (result == None):
+            message = "This ticket does not exist. Please restart this branch of this conversation."
     
     response = {"messages": message}
     
