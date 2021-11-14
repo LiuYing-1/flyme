@@ -317,6 +317,32 @@ def giveFeedback(paramsFromAssistant, cur):
     response = {"messages": message}
     return response
 
+# Insert a User Data
+def insertUser(name, pw, cur):
+    sqlStatement = "insert into user(username, password) values('{}', '{}')".format(name, pw)
+    cur.execute(sqlStatement)
+    message = "User Account > '{}' has been created successfully. You can book ticket now".format(name)
+    
+    return message
+
+# Register a User - Extra Function
+def registerUser(paramsFromAssistant, cur):
+    # Assign the values to username and password
+    username = paramsFromAssistant["username"]
+    password = paramsFromAssistant["password"]
+    
+    # Check whether the username could be use.
+    result = getUserByUsername(username, cur)
+    if (result != None):
+        message = "Sorry, this username has been used, please restart this branch of the conversation."
+    else:
+        message = insertUser(username, password, cur)
+    
+    response = {"messages": message}
+    
+    return response
+
+
 # Webhook Operations Here => http:webhook.flyme.social
 @app.route("/webhook", methods=['POST', 'GET'])
 def webhook():
@@ -347,6 +373,10 @@ def webhook():
     # Collect Feedback Part
     elif action == "giveFeedback":
         messages = giveFeedback(params, cursor)
+
+    # Register A User
+    elif action == "registerUser":
+        messages = registerUser(params, cursor)
 
     # Commit the change
     flymeDB.commit()
