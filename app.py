@@ -30,14 +30,6 @@ def conn():
     return database
 
 
-# Convert Response into JSON format
-def convertFormat(items):
-    flights = {"flights": items}
-    res = json.loads(json.dumps(flights))
-    
-    return res
-
-
 def get_flights(cursor, sql) -> List[Flight]:
     # View all the records in the table 'flight'
     cursor.execute(sql)
@@ -76,6 +68,11 @@ def bookTicketsFirstStepCheck(paramsFirstStep, cur):
         ]
     }
     
+    # If the dict of Flights is empty, return message below
+    if (len(responseFirstStep["flights"]) == 0):
+        message = "Sorry, I haven't find your desired flights, please view our flights first."
+        responseFirstStep = {"flights": message}
+
     return responseFirstStep
 
 # Get corresponding user information with username
