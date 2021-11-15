@@ -100,9 +100,9 @@ def getUserByUsername(name, cursor):
     
     return result
 
-# Get corresponding flight information with flightCode
-def getFlightByFlightCode(code, cursor):
-    sql = "select * from flight where flight_code = '{}'".format(code)
+# Get corresponding flight information with flightCode and departure_time (Updated)
+def getFlightByFlightCode(code, date, cursor):
+    sql = "select * from flight where flight_code = '{}' and departure_time like '{} %'".format(code, date)
     cursor.execute(sql)
     result = cursor.fetchone()
     
@@ -118,12 +118,12 @@ def generateTicketCode():
 
 
 # Extract the Book Ticket Second Step Book - User Exist
-def bookTicketSecondStepBookUserExist(user, password, code, cur):
+def bookTicketSecondStepBookUserExist(user, password, code, date, cur):
     userId = user[0]
     passwordFromDatabase = user[2]
     
     # Get corresponding flight.id => FlightInformation
-    flight = getFlightByFlightCode(code, cur)
+    flight = getFlightByFlightCode(code, date, cur)
     flightId = flight[0]
 
     if password == passwordFromDatabase:
@@ -141,6 +141,9 @@ def bookTicketSecondStepBookUserExist(user, password, code, cur):
 # Book Tickets - Second Step
 def bookTicketsSecondStepBook(paramsSecondStep, cur):
     print("second step")
+    
+    departureTime = paramsSecondStep["departureTime"]
+    
     # Assign the flight code to the variable
     flightCode = paramsSecondStep["flightCode"]
     username = paramsSecondStep["username"]
@@ -151,7 +154,7 @@ def bookTicketsSecondStepBook(paramsSecondStep, cur):
     if (userExistence == None):
         message = "Sorry, you don't have authority to book a ticket, please make a registration first."
     else:
-        message = bookTicketSecondStepBookUserExist(userExistence, password, flightCode, cur)
+        message = bookTicketSecondStepBookUserExist(userExistence, password, flightCode, departureTime, cur)
         
     response = {"messages":message}
     
