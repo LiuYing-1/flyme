@@ -73,9 +73,9 @@ def bookTicketsFirstStepCheck(paramsFirstStep, cur):
     
     message = 'Flights: \n'
     for flight in flights:
-        message += "ID: " + str(flight.id) + ", Flight-Code: " + flight.flight_code \
-                    + ", Start-Region: " + flight.start_region + ", End-Region: " + flight.end_region \
-                    + ", Departure-Time: " + str(flight.departure_time) + ", Price: " + str(flight.price) + "\n"
+        message += "=> ID[" + str(flight.id) + "]\n- Flight-Code: " + flight.flight_code \
+                    + "\n- Start-Region: " + flight.start_region + "\n- End-Region: " + flight.end_region \
+                    + "\n- Departure-Time: " + str(flight.departure_time) + "\n- Price: " + str(flight.price) + "\n\n"
     message += "Please choose one (Flight Code) to book."
     responseFirstStep = {"flights": message}
     
