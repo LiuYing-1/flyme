@@ -45,12 +45,12 @@ def viewFlights(cur):
     sqlStatement = "select * from flight"
     flights = get_flights(cur, sqlStatement)
     
-    resString = 'Flights: \n'
+    message = 'Flights: \n'
     for flight in flights:
-        resString += "ID: " + str(flight.id) + ", Flight-Code: " + flight.flight_code \
+        message += "ID: " + str(flight.id) + ", Flight-Code: " + flight.flight_code \
                     + ", Start-Region: " + flight.start_region + ", End-Region: " + flight.end_region \
-                    + ", Departure-Time: " + str(flight.departure_time) + ", Price: " + str(flight.price) + "\n Please choose one Flight Code to book.\n"
-    response = {"flights": resString}
+                    + ", Departure-Time: " + str(flight.departure_time) + ", Price: " + str(flight.price) + "\n"
+    response = {"flights": message}
     
     # response = {
     #     "flights": [
@@ -70,11 +70,20 @@ def bookTicketsFirstStepCheck(paramsFirstStep, cur):
     date = paramsFirstStep["date"]
     sqlStatement = "select * from flight where (start_region = '{}' and end_region = '{}' and departure_time like '{} %')".format(startRegion, endRegion, date)
     flights = get_flights(cur, sqlStatement)
-    responseFirstStep = {
-        "flights": [
-            flight.dict() for flight in flights
-        ]
-    }
+    
+    message = 'Flights: \n'
+    for flight in flights:
+        message += "ID: " + str(flight.id) + ", Flight-Code: " + flight.flight_code \
+                    + ", Start-Region: " + flight.start_region + ", End-Region: " + flight.end_region \
+                    + ", Departure-Time: " + str(flight.departure_time) + ", Price: " + str(flight.price) + "\n"
+    message += "Please choose one (Flight Code) to book."
+    responseFirstStep = {"flights": message}
+    
+    # responseFirstStep = {
+    #     "flights": [
+    #         flight.dict() for flight in flights
+    #     ]
+    # }
     
     # If the dict of Flights is empty, return message below
     if (len(responseFirstStep["flights"]) == 0):
@@ -233,8 +242,14 @@ def checkTickets(paramsFromAssistant, cur):
         
         if result:
             existence = "yes"
-            res = getTicketInDetailByTicketCode(ticketCodeFromAssistant, cur)
-            message = Ticket.create_from_tuple(res).json()
+            ticket = getTicketInDetailByTicketCode(ticketCodeFromAssistant, cur)
+            # message = Ticket.create_from_tuple(res).json()
+            
+            message = "Ticket: \n" + "Ticket-Code: " + ticketCodeFromAssistant + " Username: " \
+                        + usernameFromAssistant + " Flight-Code: " + str(ticket[3]) + " Departure-Time: " \
+                        + str(ticket[4]) + " Price: " + str(ticket[5]) + "\n"
+            
+            
     response = {"messages": message, "mark": existence}
     
     return response
