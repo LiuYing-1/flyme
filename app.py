@@ -47,9 +47,9 @@ def viewFlights(cur):
     
     message = 'Flights: \n'
     for flight in flights:
-        message += "ID: " + str(flight.id) + ", Flight-Code: " + flight.flight_code \
-                    + ", Start-Region: " + flight.start_region + ", End-Region: " + flight.end_region \
-                    + ", Departure-Time: " + str(flight.departure_time) + ", Price: " + str(flight.price) + "\n"
+        message += "=> ID[" + str(flight.id) + "] => Flight-Code: " + flight.flight_code \
+                    + "\nStart-Region: " + flight.start_region + ", End-Region: " + flight.end_region \
+                    + "\nDeparture-Time: " + str(flight.departure_time) + ", Price: " + str(flight.price) + "\n\n"
     response = {"flights": message}
     
     # response = {
@@ -245,9 +245,9 @@ def checkTickets(paramsFromAssistant, cur):
             ticket = getTicketInDetailByTicketCode(ticketCodeFromAssistant, cur)
             # message = Ticket.create_from_tuple(res).json()
             
-            message = "Ticket: \n" + "Ticket-Code: " + ticketCodeFromAssistant + " Username: " \
-                        + usernameFromAssistant + " Flight-Code: " + str(ticket[3]) + " Departure-Time: " \
-                        + str(ticket[4]) + " Price: " + str(ticket[5]) + "\n"
+            message = "=> Ticket-Code[" + ticketCodeFromAssistant + "]\n- Username: " \
+                        + usernameFromAssistant + "\n- Flight-Code: " + str(ticket[3]) + "\n- Departure-Time: " \
+                        + str(ticket[4]) + "\n- Price: " + str(ticket[5]) + "\n"
             
             
     response = {"messages": message, "mark": existence}
