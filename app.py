@@ -44,11 +44,19 @@ def get_flights(cursor, sql) -> List[Flight]:
 def viewFlights(cur):
     sqlStatement = "select * from flight"
     flights = get_flights(cur, sqlStatement)
-    response = {
-        "flights": [
-            flight.dict() for flight in flights
-        ]
-    }
+    
+    resString = 'Flights: \n'
+    for flight in flights:
+        resString += "ID: " + str(flight.id) + ", Flight-Code: " + flight.flight_code \
+                    + ", Start-Region: " + flight.start_region + ", End-Region: " + flight.end_region \
+                    + ", Departure-Time: " + str(flight.departure_time) + ", Price: " + str(flight.price) + "\n Please choose one Flight Code to book.\n"
+    response = {"flights": resString}
+    
+    # response = {
+    #     "flights": [
+    #         flight.dict() for flight in flights
+    #     ]
+    # }
     
     return response
 
