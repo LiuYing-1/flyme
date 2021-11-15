@@ -242,12 +242,13 @@ def checkTickets(paramsFromAssistant, cur):
         
         if result:
             existence = "yes"
-            res = getTicketInDetailByTicketCode(ticketCodeFromAssistant, cur)
-            message = Ticket.create_from_tuple(res).json()
+            # res = getTicketInDetailByTicketCode(ticketCodeFromAssistant, cur)
+            ticket = getTicketInDetailByTicketCode(ticketCodeFromAssistant, cur)
+            # message = Ticket.create_from_tuple(res).json()
             
-            # message = "=> Ticket-Code " + ticketCodeFromAssistant + "\n- Username: " \
-            #             + usernameFromAssistant + "\n- Flight-Code: " + str(ticket[3]) + "\n- Departure-Time: " \
-            #             + str(ticket[4]) + "\n- Price: " + str(ticket[5]) + "\n"
+            message = "=> Ticket-Code " + ticketCodeFromAssistant + "\n- Username: " \
+                        + usernameFromAssistant + "\n- Flight-Code: " + str(ticket[3]) + "\n- Departure-Time: " \
+                        + str(ticket[4]) + "\n- Price: " + str(ticket[5]) + "\n"
             
             
     response = {"messages": message, "mark": existence}
@@ -268,19 +269,19 @@ def deleteTicketByTicketCode(code, cur):
 
 # Result mark value is yes
 def resMarkIsValue(res, cur):
-    # ticket = res["messages"]
-    ticket = json.loads(res["messages"])
+    ticket = res["messages"]
+    # ticket = json.loads(res["messages"])
     
-    departure_time = ticket["departure_time"]
-    ticketCode = ticket["ticket_code"]
-    flightCode = ticket["flight_code"]
-    price = ticket["price"]
+    # departure_time = ticket["departure_time"]
+    # ticketCode = ticket["ticket_code"]
+    # flightCode = ticket["flight_code"]
+    # price = ticket["price"]
     
     # Get the departure_time, price and flight_code
-    # departure_time = ticket.split("\n")[3].split("Departure-Time: ")[1]
-    # ticketCode = ticket.split("\n")[0].split("Ticket-Code ")[1]
-    # flightCode = ticket.split("\n")[2].split("Flight-Code: ")[1]
-    # price = ticket.split("\n")[4].split("Price: ")[1]
+    departure_time = ticket.split("\n")[3].split("Departure-Time: ")[1]
+    ticketCode = ticket.split("\n")[0].split("Ticket-Code ")[1]
+    flightCode = ticket.split("\n")[2].split("Flight-Code: ")[1]
+    price = ticket.split("\n")[4].split("Price: ")[1]
     
     # Delete the ticket
     deleteTicketByTicketCode(ticketCode, cur)
