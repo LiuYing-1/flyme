@@ -382,6 +382,25 @@ def registerUser(paramsFromAssistant, cur):
     
     return response
 
+# Extra Function - Login
+def loginUser(paramsFromAssistant, cur):
+    message = "This user does not exist. Please make a registration first."
+    
+    username = paramsFromAssistant["username"]
+    password = paramsFromAssistant["password"]
+    
+    user = getUserByUsername(username, cur)
+    if (user != None):
+        print(user)
+        passwordFromDatabase = user[2]
+        message = "Sorry, your password is incorrect. Please restart the conversation."
+        if (password == passwordFromDatabase):
+            message = "Dear '{}', welcome back. What can I do?".format(username)
+            
+    response = {"messages": message}
+    
+    return response
+
 
 # Webhook Operations Here => http:webhook.flyme.social
 @app.route("/webhook", methods=['POST', 'GET'])
@@ -413,6 +432,11 @@ def webhook():
     # Collect Feedback Part
     elif action == "giveFeedback":
         messages = giveFeedback(params, cursor)
+
+    # Login
+    elif action == "loginUser":
+        messages = loginUser(params, cursor)
+    
 
     # Register A User
     elif action == "registerUser":
