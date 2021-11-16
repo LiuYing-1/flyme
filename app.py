@@ -72,8 +72,12 @@ def bookTicketsFirstStepCheck(paramsFirstStep, cur):
 
     # Initialize Message if user does not exist in the database
     message = "Sorry, please login to continue."
+    
     userExistence = getUserByUsername(username, cur)
-    if (userExistence != None):
+
+    if(len(username) != 0 and userExistence == None):
+        message = "Sorry, this account does not exist, please make a registration first."
+    elif (userExistence != None):
         sqlStatement = "select * from flight where (start_region = '{}' and end_region = '{}' and departure_time like '{} %')".format(startRegion, endRegion, date)
         flights = get_flights(cur, sqlStatement)
     
@@ -395,7 +399,7 @@ def loginUser(paramsFromAssistant, cur):
         passwordFromDatabase = user[2]
         message = "Sorry, your password is incorrect. Please restart the conversation."
         if (password == passwordFromDatabase):
-            message = "Dear '{}', welcome back. What can I do?".format(username)
+            message = "Dear '{}', welcome back. What can I do for you?".format(username)
             
     response = {"messages": message}
     
