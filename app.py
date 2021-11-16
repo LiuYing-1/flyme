@@ -74,7 +74,7 @@ def bookTicketsFirstStepCheck(paramsFirstStep, cur):
     message = "Sorry, please login to continue."
     
     userExistence = getUserByUsername(username, cur)
-    if((len(username) != 0) and userExistence == None):
+    if(username != None and userExistence == None):
         message = "Sorry, this account does not exist, please make a registration first."
     elif (userExistence != None):
         sqlStatement = "select * from flight where (start_region = '{}' and end_region = '{}' and departure_time like '{} %')".format(startRegion, endRegion, date)
