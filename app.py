@@ -68,27 +68,34 @@ def bookTicketsFirstStepCheck(paramsFirstStep, cur):
     startRegion = paramsFirstStep["startRegion"]
     endRegion = paramsFirstStep["endRegion"]
     date = paramsFirstStep["date"]
-    sqlStatement = "select * from flight where (start_region = '{}' and end_region = '{}' and departure_time like '{} %')".format(startRegion, endRegion, date)
-    flights = get_flights(cur, sqlStatement)
+    username = paramsFirstStep["username"]
+
+    # Initialize Message if user does not exist in the database
+    message = "Sorry, please login to continue."
+    userExistence = getUserByUsername(username, cur)
+    if (userExistence != None):
+        sqlStatement = "select * from flight where (start_region = '{}' and end_region = '{}' and departure_time like '{} %')".format(startRegion, endRegion, date)
+        flights = get_flights(cur, sqlStatement)
     
-    message = 'Flights: \n'
-    for flight in flights:
-        message += "=> ID[" + str(flight.id) + "]\n- Flight-Code: " + flight.flight_code \
-                    + "\n- Start-Region: " + flight.start_region + "\n- End-Region: " + flight.end_region \
-                    + "\n- Departure-Time: " + str(flight.departure_time) + "\n- Price: " + str(flight.price) + "\n\n"
-    message += "Please choose one (Flight Code) to book."
+        message = 'Flights: \n'
+        for flight in flights:
+            message += "=> ID[" + str(flight.id) + "]\n- Flight-Code: " + flight.flight_code \
+                        + "\n- Start-Region: " + flight.start_region + "\n- End-Region: " + flight.end_region \
+                        + "\n- Departure-Time: " + str(flight.departure_time) + "\n- Price: " + str(flight.price) + "\n\n"
+        message += "Please choose one (Flight Code) to book."
+
+        flightsNum = {
+            "flights": [
+                flight.dict() for flight in flights
+            ]
+        }
+        
+        # If the dict of Flights is empty, return message below
+        if (len(flightsNum["flights"]) == 0):
+            message = "Sorry, I haven't find your desired flights, please view our flights first."
+            responseFirstStep = {"flights": message}
+    
     responseFirstStep = {"flights": message}
-    
-    # responseFirstStep = {
-    #     "flights": [
-    #         flight.dict() for flight in flights
-    #     ]
-    # }
-    
-    # If the dict of Flights is empty, return message below
-    if (len(responseFirstStep["flights"]) == 0):
-        message = "Sorry, I haven't find your desired flights, please view our flights first."
-        responseFirstStep = {"flights": message}
 
     return responseFirstStep
 
@@ -432,6 +439,11 @@ def cancellationTerms():
 @app.route("/static/contact")
 def contactUs():
     return app.send_static_file('contact.html')
+
+# Data Security Terms
+@app.route("/static/security")
+def dataSecurity():
+    return app.send_static_file('security.html')
 
 # Static Index Here
 @app.route("/")
